@@ -32,7 +32,17 @@ def rank5(cards: list[Card]) -> dict:
     is_flush = len({c.suit for c in cards}) == 1
     straight = _straight_high_and_order(ranks)
 
-    # FOUR_OF_A_KIND: 4 + 1
+    # STRAIGHT_FLUSH (highest): flush + straight
+    if is_flush and straight is not None:
+        high, order = straight
+        chosen = [next(c for c in cards if c.rank == r) for r in order]
+        return {
+            "category": "STRAIGHT_FLUSH",
+            "chosen5": chosen,
+            "tiebreak": (high,),
+        }
+
+    # FOUR_OF_A_KIND
     if count_values == [4, 1]:
         quad_rank = max(r for r, cnt in counts.items() if cnt == 4)
         kicker_rank = max(r for r, cnt in counts.items() if cnt == 1)
@@ -54,6 +64,7 @@ def rank5(cards: list[Card]) -> dict:
             "tiebreak": (trip_rank, pair_rank),
         }
 
+    # FLUSH
     if is_flush:
         chosen = _sort_cards_desc(cards)
         return {
@@ -62,6 +73,7 @@ def rank5(cards: list[Card]) -> dict:
             "tiebreak": tuple(c.rank for c in chosen),
         }
 
+    # STRAIGHT
     if straight is not None:
         high, order = straight
         chosen = [next(c for c in cards if c.rank == r) for r in order]
