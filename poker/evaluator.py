@@ -169,3 +169,15 @@ def best_of_7(cards7: list[Card]) -> dict:
             best_key = k
 
     return best  
+
+
+def holdem_best(board5: list[Card], hole2: list[Card]) -> dict:
+    """
+    Texas Hold'em: best 5-card hand out of board5 + hole2.
+    Allows 0/1/2 hole cards to be used naturally.
+    """
+    if len(board5) != 5:
+        raise ValueError("holdem_best expects exactly 5 board cards")
+    if len(hole2) != 2:
+        raise ValueError("holdem_best expects exactly 2 hole cards")
+    return best_of_7(board5 + hole2)
