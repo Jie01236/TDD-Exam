@@ -13,6 +13,21 @@ def rank5(cards: list[Card]) -> dict:
     counts = Counter(c.rank for c in cards)
     count_values = sorted(counts.values(), reverse=True)
 
+    # THREE_OF_A_KIND: 3 + 1 + 1
+    if count_values == [3, 1, 1]:
+        trip_rank = max(r for r, cnt in counts.items() if cnt == 3)
+        kickers = sorted((r for r, cnt in counts.items() if cnt == 1), reverse=True)
+
+        trip_cards = [c for c in cards if c.rank == trip_rank]
+        kicker_cards = _sort_cards_desc([c for c in cards if c.rank in kickers])
+
+        chosen = trip_cards + kicker_cards
+        return {
+            "category": "THREE_OF_A_KIND",
+            "chosen5": chosen,
+            "tiebreak": (trip_rank, *kickers),
+        }
+
     # TWO_PAIR: 2 + 2 + 1
     if count_values == [2, 2, 1]:
         pair_ranks = sorted((r for r, cnt in counts.items() if cnt == 2), reverse=True)
