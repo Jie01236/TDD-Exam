@@ -32,6 +32,17 @@ def rank5(cards: list[Card]) -> dict:
     is_flush = len({c.suit for c in cards}) == 1
     straight = _straight_high_and_order(ranks)
 
+    # FOUR_OF_A_KIND: 4 + 1
+    if count_values == [4, 1]:
+        quad_rank = max(r for r, cnt in counts.items() if cnt == 4)
+        kicker_rank = max(r for r, cnt in counts.items() if cnt == 1)
+        chosen = [c for c in cards if c.rank == quad_rank] + _sort_cards_desc([c for c in cards if c.rank == kicker_rank])
+        return {
+            "category": "FOUR_OF_A_KIND",
+            "chosen5": chosen,
+            "tiebreak": (quad_rank, kicker_rank),
+        }
+
     # FULL_HOUSE: 3 + 2
     if count_values == [3, 2]:
         trip_rank = max(r for r, cnt in counts.items() if cnt == 3)
