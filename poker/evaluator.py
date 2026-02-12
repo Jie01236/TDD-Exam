@@ -32,6 +32,17 @@ def rank5(cards: list[Card]) -> dict:
     is_flush = len({c.suit for c in cards}) == 1
     straight = _straight_high_and_order(ranks)
 
+    # FULL_HOUSE: 3 + 2
+    if count_values == [3, 2]:
+        trip_rank = max(r for r, cnt in counts.items() if cnt == 3)
+        pair_rank = max(r for r, cnt in counts.items() if cnt == 2)
+        chosen = [c for c in cards if c.rank == trip_rank] + [c for c in cards if c.rank == pair_rank]
+        return {
+            "category": "FULL_HOUSE",
+            "chosen5": chosen,
+            "tiebreak": (trip_rank, pair_rank),
+        }
+
     if is_flush:
         chosen = _sort_cards_desc(cards)
         return {
@@ -53,9 +64,10 @@ def rank5(cards: list[Card]) -> dict:
     if count_values == [3, 1, 1]:
         trip_rank = max(r for r, cnt in counts.items() if cnt == 3)
         kickers = sorted((r for r, cnt in counts.items() if cnt == 1), reverse=True)
+        chosen = [c for c in cards if c.rank == trip_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers])
         return {
             "category": "THREE_OF_A_KIND",
-            "chosen5": [c for c in cards if c.rank == trip_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers]),
+            "chosen5": chosen,
             "tiebreak": (trip_rank, *kickers),
         }
 
@@ -77,9 +89,10 @@ def rank5(cards: list[Card]) -> dict:
     if count_values == [2, 1, 1, 1]:
         pair_rank = max(r for r, cnt in counts.items() if cnt == 2)
         kickers = sorted((r for r, cnt in counts.items() if cnt == 1), reverse=True)
+        chosen = [c for c in cards if c.rank == pair_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers])
         return {
             "category": "ONE_PAIR",
-            "chosen5": [c for c in cards if c.rank == pair_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers]),
+            "chosen5": chosen,
             "tiebreak": (pair_rank, *kickers),
         }
 
