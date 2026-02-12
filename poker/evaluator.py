@@ -29,12 +29,20 @@ def rank5(cards: list[Card]) -> dict:
     counts = Counter(ranks)
     count_values = sorted(counts.values(), reverse=True)
 
+    is_flush = len({c.suit for c in cards}) == 1
     straight = _straight_high_and_order(ranks)
+
+    if is_flush:
+        chosen = _sort_cards_desc(cards)
+        return {
+            "category": "FLUSH",
+            "chosen5": chosen,
+            "tiebreak": tuple(c.rank for c in chosen),
+        }
+
     if straight is not None:
         high, order = straight
-        chosen = []
-        for r in order:
-            chosen.append(next(c for c in cards if c.rank == r))
+        chosen = [next(c for c in cards if c.rank == r) for r in order]
         return {
             "category": "STRAIGHT",
             "chosen5": chosen,
@@ -45,12 +53,9 @@ def rank5(cards: list[Card]) -> dict:
     if count_values == [3, 1, 1]:
         trip_rank = max(r for r, cnt in counts.items() if cnt == 3)
         kickers = sorted((r for r, cnt in counts.items() if cnt == 1), reverse=True)
-
-        trip_cards = [c for c in cards if c.rank == trip_rank]
-        kicker_cards = _sort_cards_desc([c for c in cards if c.rank in kickers])
         return {
             "category": "THREE_OF_A_KIND",
-            "chosen5": trip_cards + kicker_cards,
+            "chosen5": [c for c in cards if c.rank == trip_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers]),
             "tiebreak": (trip_rank, *kickers),
         }
 
@@ -72,11 +77,9 @@ def rank5(cards: list[Card]) -> dict:
     if count_values == [2, 1, 1, 1]:
         pair_rank = max(r for r, cnt in counts.items() if cnt == 2)
         kickers = sorted((r for r, cnt in counts.items() if cnt == 1), reverse=True)
-        pair_cards = [c for c in cards if c.rank == pair_rank]
-        kicker_cards = _sort_cards_desc([c for c in cards if c.rank in kickers])
         return {
             "category": "ONE_PAIR",
-            "chosen5": pair_cards + kicker_cards,
+            "chosen5": [c for c in cards if c.rank == pair_rank] + _sort_cards_desc([c for c in cards if c.rank in kickers]),
             "tiebreak": (pair_rank, *kickers),
         }
 
