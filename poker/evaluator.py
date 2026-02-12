@@ -181,3 +181,22 @@ def holdem_best(board5: list[Card], hole2: list[Card]) -> dict:
     if len(hole2) != 2:
         raise ValueError("holdem_best expects exactly 2 hole cards")
     return best_of_7(board5 + hole2)
+
+
+def determine_winners(board5: list[Card], players_holes: list[list[Card]]) -> dict:
+    """
+    Evaluate each player's best hand, return winner(s).
+    winners is a list of indices (supports ties / split pots).
+    """
+    results: list[dict] = []
+    keys: list[tuple[int, tuple]] = []
+
+    for hole2 in players_holes:
+        r = holdem_best(board5, hole2)
+        results.append(r)
+        keys.append(_hand_key(r))
+
+    best_key = max(keys)
+    winners = [i for i, k in enumerate(keys) if k == best_key]
+
+    return {"results": results, "winners": winners}
